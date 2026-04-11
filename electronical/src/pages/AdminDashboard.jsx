@@ -1,0 +1,118 @@
+import React from 'react';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import useStore from '../store/UseStore';
+import { FaDollarSign, FaBoxOpen, FaShoppingCart, FaUndo, FaChartBar, FaSignOutAlt, FaBox } from 'react-icons/fa';
+import { FaMoneyCheckAlt } from 'react-icons/fa';
+
+const AdminDashboard = () => {
+  const { products, orders, returns, logoutAdmin } = useStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // --- الحسابات (Logic) ---
+  const netSales = orders
+    .filter(o => o.status === 'delivered')
+    .reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
+
+  const returnsValue = returns.reduce((sum, ret) => sum + (Number(ret.totalAmount) || 0), 0);
+  const pendingOrdersCount = orders.filter(o => o.status !== 'delivered').length;
+
+  const stats = [
+    { title: "صافي المبيعات", value: `LE ${netSales.toFixed(2)}`, icon: <FaDollarSign />, color: "bg-green-600" },
+    { title: "عدد المنتجات", value: products.length, icon: <FaBoxOpen />, color: "bg-blue-500" },
+    { title: "أوردرات قيد التنفيذ", value: pendingOrdersCount, icon: <FaShoppingCart />, color: "bg-purple-500" },
+    { title: "قيمة المرتجعات", value: `LE ${returnsValue.toFixed(2)}`, icon: <FaUndo />, color: "bg-red-500" },
+  ];
+
+  const handleLogout = () => {
+    logoutAdmin();
+    navigate('/admin-login');
+  };
+
+  return (
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 font-['Cairo']" dir="rtl">
+      {/* --- 1. السايد بار الثابت --- */}
+      <aside className="w-64 bg-white dark:bg-gray-800 shadow-2xl flex flex-col fixed h-full z-10 border-l dark:border-gray-700">
+        <div className="p-8 text-2xl font-black text-indigo-600 dark:text-white border-b dark:border-gray-700 flex items-center gap-2">
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white text-sm">M</div>
+          لوحة MIS
+        </div>
+        
+        <nav className="flex-1 p-4 space-y-2 mt-4">
+          <SidebarLink to="/secret-portal-mis" icon={<FaChartBar />} label="نظرة عامة" active={location.pathname === '/secret-portal-mis'} />
+          <SidebarLink to="/secret-portal-mis/products" icon={<FaBox />} label="إدارة المنتجات" active={location.pathname.includes('products')} />
+          <SidebarLink to="/secret-portal-mis/orders" icon={<FaShoppingCart />} label="إدارة الطلبات" active={location.pathname.includes('orders')} />
+          <SidebarLink to="/secret-portal-mis/sales" icon={<FaMoneyCheckAlt />} label="سجل المبيعات" active={location.pathname.includes('sales')} />
+          <SidebarLink to="/secret-portal-mis/returns" icon={<FaUndo />} label="المرتجعات" active={location.pathname.includes('returns')} />
+        </nav>
+
+        <button 
+          onClick={handleLogout}
+          className="m-4 p-4 flex items-center gap-3 text-red-500 font-black hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition-all"
+        >
+          <FaSignOutAlt /> تسجيل الخروج
+        </button>
+      </aside>
+
+      {/* --- 2. المحتوى المتغير --- */}
+      <main className="flex-1 mr-64 p-8">
+        {/* العناوين والإحصائيات تظهر فقط في الصفحة الرئيسية للداشبورد */}
+        {location.pathname === '/secret-portal-mis' ? (
+          <div className="animate-in fade-in duration-500">
+            <h2 className="text-3xl font-black mb-8 dark:text-white">نظرة عامة على الأداء 📈</h2>
+            
+            {/* مربعات الإحصائيات */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((stat, index) => (
+                <div key={index} className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                  <div className="text-right">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm font-bold">{stat.title}</p>
+                    <h3 className="text-2xl font-black dark:text-white mt-1">{stat.value}</h3>
+                  </div>
+                  <div className={`${stat.color} text-white p-4 rounded-2xl text-2xl shadow-lg`}>
+                    {stat.icon}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* بانر التحليل */}
+            <div className="mt-12 bg-indigo-900 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl border-4 border-white/5">
+              <div className="relative z-10">
+                <h3 className="text-2xl font-bold mb-2">تحليل أداء المتجر (MIS) 🚀</h3>
+                <p className="opacity-80 max-w-xl font-medium leading-relaxed">
+                  الحسابات الآن دقيقة وتلقائية. يمكنك متابعة الأرباح الصافية بعد استبعاد المرتجعات والأوردرات التي لم تُسلم بعد.
+                </p>
+              </div>
+              <div className="absolute -bottom-10 -left-10 text-[15rem] text-indigo-800 opacity-30 transform -rotate-12 font-black select-none pointer-events-none">
+                $
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* هنا بيتم عرض المحتوى الفرعي (مثل صفحة إدارة المنتجات التي تحتوي على زر الإضافة الجديد) */
+          <div className="animate-in slide-in-from-bottom-4 duration-500">
+            <Outlet />
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+// مكون روابط السايد بار
+const SidebarLink = ({ to, icon, label, active }) => (
+  <Link 
+    to={to} 
+    className={`flex items-center gap-3 p-4 rounded-2xl transition-all font-bold ${
+      active 
+      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none' 
+      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+    }`}
+  >
+    <span className={active ? 'text-white' : 'text-indigo-600'}>{icon}</span>
+    <span>{label}</span>
+  </Link>
+);
+
+export default AdminDashboard;
