@@ -1,213 +1,202 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { FaMapMarkerAlt, FaPhoneAlt, FaUser, FaEdit, FaExclamationTriangle } from 'react-icons/fa';
 import useStore from '../store/UseStore';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaArrowRight, FaCcVisa, FaMoneyBillWave, FaMobileAlt, FaLock, FaCalendarAlt, FaUser } from 'react-icons/fa';
-import { SiVodafone } from 'react-icons/si';
+
+const PaymentOption = ({ id, active, icon, label, onClick, color }) => (
+  <button
+    type="button"
+    onClick={() => onClick(id)}
+    className={`w-full flex items-center gap-4 p-4 rounded-3xl border transition-all ${
+      active 
+        ? `border-${color}-500 bg-${color}-500/10 ring-2 ring-${color}-500/20` 
+        : 'border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800'
+    }`}
+  >
+    <span className="text-2xl">{icon}</span>
+    <span className="font-bold dark:text-white">{label}</span>
+  </button>
+);
 
 const Checkout = () => {
-  const { cart, clearCart, addOrder, discount, resetDiscount } = useStore(); 
+  const { cart, clearCart, fetchUserOrdersFromDB, discount, resetDiscount, user } = useStore();
   const navigate = useNavigate();
-  
-  const [submitted, setSubmitted] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState('cash');
   const [vodafoneNumber, setVodafoneNumber] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // --- 1. حساب المبالغ بدقة وحماية من الـ NaN ---
-  const subtotal = cart.reduce((acc, item) => {
-    return acc + (Number(item.price) * (Number(item.quantity) || 1));
-  }, 0);
+  // --- إصلاح الحسابات (منع الأرقام الكبيرة والسالب) ---
+  const itemsTotal = cart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (item.quantity || 1), 0);
+  const discountAmount = discount ? (itemsTotal * discount) / 100 : 0; // القسمة على 100 مهمة جداً
+  const finalTotal = (itemsTotal - discountAmount).toFixed(2);
 
-  const discountAmount = subtotal * (Number(discount) || 0);
-  const finalTotal = (subtotal - discountAmount).toFixed(2); 
+  const isProfileComplete = user?.name && user?.phone && user?.address && user?.father_name;
 
-  // --- 2. معالجة إرسال الطلب ---
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
+  const handlePlaceOrder = async () => {
+    if (cart.length === 0) {
+      toast.error('السلة فارغة!');
+      return;
+    }
 
-    const formData = new FormData(e.target);
+    if (!isProfileComplete) {
+      toast.error('يرجى إكمال بيانات الشحن في حسابك أولاً');
+      return;
+    }
 
-    addOrder({
-      id: Date.now(),
-      customerName: formData.get('fullName'),
-      email: formData.get('email'),
-      address: formData.get('address'),
-      phone: formData.get('phone'),
-      paymentMethod: paymentMethod,
-      walletNumber: paymentMethod === 'vodafone' ? vodafoneNumber : 'N/A', 
-      totalAmount: Number(finalTotal), 
-      status: 'pending',
-      items: cart,
-      date: new Date().toLocaleDateString('ar-EG'),
-    });
+    if (paymentMethod === 'vodafone' && !vodafoneNumber.trim()) {
+      toast.error('أدخل رقم فودافون كاش');
+      return;
+    }
 
-    setTimeout(() => {
-      clearCart();
-      resetDiscount();
-      navigate('/success');
-    }, 1500);
+    setLoading(true);
+    const loadingToast = toast.loading('جاري معالجة طلبك...');
+
+    const orderPayload = {
+      user_id: user.id,
+      total_price: finalTotal,
+      payment_method: paymentMethod,
+      wallet_number: paymentMethod === 'vodafone' ? vodafoneNumber : null,
+      cart: cart.map(item => ({
+          id: item.id,
+          price: item.price,
+          quantity: item.quantity,
+          title: item.title || item.name
+      })),
+      customer_name: `${user.name} ${user.father_name}`,
+      customer_phone: user.phone,
+      shipping_address: user.address,
+    };
+
+    try {
+      const response = await axios.post('http://localhost:8080/electronical_backend/place_order.php', orderPayload);
+      
+      if (response.data.status === 'success') {
+        if (user?.id) await fetchUserOrdersFromDB(user.id);
+        toast.success('تم تسجيل طلبك بنجاح! 🚀', { id: loadingToast });
+        clearCart();
+        resetDiscount();
+        navigate('/success');
+      } else {
+        toast.error(response.data.message || 'حدث خطأ', { id: loadingToast });
+      }
+    } catch (error) {
+      toast.error('خطأ في الاتصال بالسيرفر', { id: loadingToast });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (submitted) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center" dir="rtl">
-        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-4xl md:text-6xl font-black text-indigo-600 italic font-['Cairo']">
-          جاري معالجة طلبك بنجاح... 🚀
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (cart.length === 0) {
-    return (
-      <div className="text-center py-20 font-['Cairo']" dir="rtl">
-        <h2 className="text-2xl font-bold dark:text-white">السلة فاضية! 😅</h2>
-        <button onClick={() => navigate('/')} className="mt-4 text-indigo-600 underline font-bold">ارجع للمحل</button>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto p-4 md:p-6 max-w-5xl font-['Cairo']" dir="rtl">
-      <h1 className="text-3xl md:text-4xl font-[1000] mb-8 text-center dark:text-white italic">إتمام عملية الشراء</h1>
-      
-      <button onClick={() => navigate('/cart')} className="flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-all mb-8 group font-bold">
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm group-hover:shadow-md">
-          <FaArrowRight className="text-sm" /> 
-        </div>
-        <span>العودة للسلة</span>
-      </button>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-6">
-          
-          {/* بيانات الشحن */}
-          <div className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-white/5">
-            <h2 className="text-xl font-black mb-6 flex items-center gap-2 dark:text-white">
-               <span className="bg-indigo-600 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">01</span>
-               بيانات الشحن
-            </h2>
-            <div className="space-y-4">
-              <input name="fullName" required type="text" placeholder="الاسم الكامل" className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-transparent focus:border-indigo-500 rounded-2xl outline-none dark:text-white transition-all font-bold" />
-              <input name="email" required type="email" placeholder="البريد الإلكتروني" className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-transparent focus:border-indigo-500 rounded-2xl outline-none dark:text-white transition-all font-bold" />
-              <input name="address" required type="text" placeholder="العنوان بالتفصيل" className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-transparent focus:border-indigo-500 rounded-2xl outline-none dark:text-white transition-all font-bold" />
-              <div className="grid grid-cols-2 gap-4">
-                <input name="city" required type="text" placeholder="المدينة" className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-transparent focus:border-indigo-500 rounded-2xl outline-none dark:text-white transition-all font-bold" />
-                <input name="phone" required type="text" placeholder="رقم الهاتف" className="w-full p-4 bg-gray-50 dark:bg-gray-900/50 border border-transparent focus:border-indigo-500 rounded-2xl outline-none dark:text-white transition-all font-bold" />
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0b1120] text-right p-4 md:p-8 font-['Cairo']" dir="rtl">
+      <div className="container mx-auto grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+        <div className="space-y-6">
+          <h1 className="text-3xl font-black dark:text-white flex items-center gap-3">
+            إتمام الطلب <span className="text-sm font-normal text-gray-500">({cart.length} منتجات)</span>
+          </h1>
+
+          <div className="bg-white dark:bg-[#111827] rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold dark:text-white flex items-center gap-2">
+                <FaMapMarkerAlt className="text-indigo-600" /> عنوان التوصيل
+              </h2>
+              <Link to="/profile" className="text-indigo-600 flex items-center gap-1 font-bold text-sm hover:underline">
+                <FaEdit /> تعديل
+              </Link>
+            </div>
+
+            {isProfileComplete ? (
+              <div className="grid gap-4 md:grid-cols-2 bg-gray-50 dark:bg-gray-900/50 p-6 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-500 uppercase">المستلم</p>
+                  <p className="font-bold dark:text-white flex items-center gap-2">
+                    <FaUser className="text-gray-400 text-xs" /> {user.name} {user.father_name}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-500 uppercase">رقم التواصل</p>
+                  <p className="font-bold dark:text-white flex items-center gap-2">
+                    <FaPhoneAlt className="text-gray-400 text-xs" /> {user.phone}
+                  </p>
+                </div>
+                <div className="md:col-span-2 space-y-2 pt-2 border-t border-gray-200 dark:border-gray-800">
+                  <p className="text-xs text-gray-500 uppercase">العنوان بالتفصيل</p>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{user.address}</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 p-6 rounded-3xl text-center">
+                <FaExclamationTriangle className="mx-auto text-red-500 text-3xl mb-3" />
+                <p className="text-red-700 dark:text-red-400 font-bold mb-4">بيانات الشحن غير مكتملة في حسابك</p>
+                <Link to="/profile" className="inline-block bg-red-500 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-red-500/20">
+                  إكمال البروفايل الآن
+                </Link>
+              </div>
+            )}
           </div>
 
-          {/* طرق الدفع */}
-          <div className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-white/5">
-            <h2 className="text-xl font-black mb-6 flex items-center gap-2 dark:text-white">
-               <span className="bg-indigo-600 text-white w-8 h-8 flex items-center justify-center rounded-lg text-sm">02</span>
-               اختر طريقة الدفع
-            </h2>
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <PaymentOption id="card" active={paymentMethod} icon={<FaCcVisa size={22}/>} label="بطاقة بنكية" onClick={setPaymentMethod} color="indigo" />
-              <PaymentOption id="vodafone" active={paymentMethod} icon={<SiVodafone size={22}/>} label="فودافون" onClick={setPaymentMethod} color="red" />
-              <PaymentOption id="cash" active={paymentMethod} icon={<FaMoneyBillWave size={22}/>} label="كاش" onClick={setPaymentMethod} color="green" />
+          <div className="bg-white dark:bg-[#111827] rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+            <h2 className="text-xl font-bold mb-6 dark:text-white">طريقة الدفع</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <PaymentOption id="cash" active={paymentMethod === 'cash'} icon="💵" label="الدفع عند الاستلام" onClick={setPaymentMethod} color="green" />
+              <PaymentOption id="vodafone" active={paymentMethod === 'vodafone'} icon="📲" label="فودافون كاش" onClick={setPaymentMethod} color="red" />
             </div>
 
-            <AnimatePresence mode="wait">
-              {/* فورم الفيزا */}
-              {paymentMethod === 'card' && (
-                <motion.div key="card" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                  <div className="p-5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-[2rem] border border-indigo-100 dark:border-indigo-900/30 space-y-4">
-                    <div className="relative">
-                      <input required type="text" placeholder="اسم صاحب البطاقة" className="w-full p-4 pr-12 bg-white dark:bg-gray-900 border-none rounded-xl outline-none dark:text-white font-bold text-sm" />
-                      <FaUser className="absolute right-4 top-4 text-gray-400" />
-                    </div>
-                    <div className="relative">
-                      <input required type="text" placeholder="رقم البطاقة (16 رقم)" className="w-full p-4 pr-12 bg-white dark:bg-gray-900 border-none rounded-xl outline-none dark:text-white font-bold text-sm" />
-                      <FaCcVisa className="absolute right-4 top-4 text-gray-400" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="relative">
-                        <input required type="text" placeholder="MM/YY" className="w-full p-4 pr-12 bg-white dark:bg-gray-900 border-none rounded-xl outline-none dark:text-white font-bold text-sm" />
-                        <FaCalendarAlt className="absolute right-4 top-4 text-gray-400" />
-                      </div>
-                      <div className="relative">
-                        <input required type="password" placeholder="CVV" className="w-full p-4 pr-12 bg-white dark:bg-gray-900 border-none rounded-xl outline-none dark:text-white font-bold text-sm" />
-                        <FaLock className="absolute right-4 top-4 text-gray-400" />
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* فورم فودافون */}
-              {paymentMethod === 'vodafone' && (
-                <motion.div key="vodafone" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                  <div className="p-5 bg-red-50 dark:bg-red-900/10 rounded-[2rem] border border-red-100 dark:border-red-900/30">
-                    <p className="text-xs text-red-600 dark:text-red-400 font-bold mb-3 flex items-center gap-2">
-                      <FaMobileAlt /> حول لـ: <span className="underline font-black text-sm">201032964194+</span>
-                    </p>
-                    <input required type="text" value={vodafoneNumber} onChange={(e) => setVodafoneNumber(e.target.value)} placeholder="رقم المحفظة المحول منها" className="w-full p-4 bg-white dark:bg-gray-900 rounded-xl outline-none border border-red-200 dark:text-white font-bold text-sm" />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {paymentMethod === 'vodafone' && (
+              <div className="mt-6 p-6 bg-red-50 dark:bg-red-900/10 rounded-3xl border border-red-100 dark:border-red-900/20 animate-in slide-in-from-top-2">
+                <label className="block text-sm font-bold mb-2 dark:text-red-400">رقم محفظة فودافون كاش</label>
+                <input value={vodafoneNumber} onChange={(e) => setVodafoneNumber(e.target.value)} type="tel" placeholder="010XXXXXXXX" className="w-full rounded-2xl border-2 border-red-200 p-4 bg-white dark:bg-gray-900 dark:text-white outline-none focus:border-red-500 transition-all" />
+              </div>
+            )}
           </div>
+        </div>
 
-          <button type="submit" className="w-full bg-indigo-600 text-white py-5 rounded-[2rem] font-[1000] text-xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-500/20 active:scale-95">
-            تأكيد الطلب (LE {finalTotal})
-          </button>
-        </form>
-
-        {/* ملخص الطلب */}
-        <div className="lg:col-span-5 h-fit lg:sticky lg:top-24">
-          <div className="bg-gray-100/50 dark:bg-gray-800/50 p-6 md:p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800">
-            <h2 className="text-2xl font-black mb-6 dark:text-white border-b dark:border-gray-700 pb-4">ملخص السلة</h2>
-            <div className="max-h-[300px] overflow-y-auto mb-6 space-y-3 pr-1">
-              {cart.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-50 dark:border-white/5">
-                  <div className="flex flex-col">
-                    <span className="truncate w-32 font-bold dark:text-gray-200 text-sm">{item.title}</span>
-                    <span className="text-[10px] text-indigo-500 font-black">الكمية: {item.quantity}</span>
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-[#111827] rounded-[2rem] p-8 shadow-xl border border-gray-200 dark:border-gray-800 h-fit sticky top-6">
+            <h2 className="text-2xl font-black mb-6 dark:text-white border-b pb-4 dark:border-gray-800">ملخص الطلب</h2>
+            <div className="max-h-[300px] overflow-y-auto pr-2 space-y-4 mb-6 custom-scrollbar">
+              {cart.map((item) => (
+                <div key={item.id} className="flex justify-between items-center gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-bold text-sm dark:text-white line-clamp-1">{item.title || item.name}</h3>
+                    <p className="text-xs text-gray-500">الكمية: {item.quantity || 1}</p>
                   </div>
-                  <span className="font-black text-indigo-600 text-sm">LE {(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-bold text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                    LE {((parseFloat(item.price) || 0) * (item.quantity || 1)).toFixed(2)}
+                  </span>
                 </div>
               ))}
             </div>
-            
-            <div className="space-y-3 border-t dark:border-gray-700 pt-5">
-              <div className="flex justify-between text-gray-500 font-bold text-sm">
-                <span>المجموع:</span>
-                <span>LE {subtotal.toFixed(2)}</span>
+
+            <div className="space-y-3 pt-4 border-t dark:border-gray-800">
+              <div className="flex justify-between text-gray-500 dark:text-gray-400">
+                <span>الإجمالي الفرعي</span>
+                <span>LE {itemsTotal.toFixed(2)}</span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-green-600 font-black text-sm bg-green-50 dark:bg-green-900/20 p-3 rounded-xl">
-                  <span>الخصم المطبق:</span>
+                <div className="flex justify-between text-green-500 font-bold bg-green-50 dark:bg-green-900/20 p-2 rounded-xl">
+                  <span>خصم الكوبون ({discount}%)</span>
                   <span>- LE {discountAmount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-2xl font-[1000] pt-4 border-t-2 border-dashed dark:border-gray-700 mt-2">
-                <span className="dark:text-white">الإجمالي:</span>
-                <span className="text-indigo-600 dark:text-indigo-400 font-black">LE {finalTotal}</span>
+              <div className="flex justify-between pt-4 mt-4 border-t-2 border-dashed dark:border-gray-700">
+                <span className="font-black text-xl dark:text-white">الإجمالي النهائي</span>
+                <span className="font-black text-2xl text-indigo-600 dark:text-indigo-400">LE {finalTotal}</span>
               </div>
             </div>
+
+            <button
+              onClick={handlePlaceOrder}
+              disabled={loading || !isProfileComplete}
+              className={`w-full mt-8 rounded-3xl py-5 text-white font-black text-lg transition-all shadow-xl
+                ${loading || !isProfileComplete ? 'bg-gray-300 dark:bg-gray-800 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 active:scale-95'}`}
+            >
+              {loading ? 'جاري التنفيذ...' : 'تأكيد الطلب والدفع'}
+            </button>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
-
-const PaymentOption = ({ id, active, icon, label, onClick, color }) => {
-  const isActive = active === id;
-  const colors = {
-    indigo: isActive ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 shadow-md scale-105' : 'border-gray-100 dark:border-white/5 text-gray-400',
-    red: isActive ? 'border-red-600 bg-red-50 dark:bg-red-600/20 text-red-600 shadow-md scale-105' : 'border-gray-100 dark:border-white/5 text-gray-400',
-    green: isActive ? 'border-green-600 bg-green-50 dark:bg-green-600/20 text-green-600 shadow-md scale-105' : 'border-gray-100 dark:border-white/5 text-gray-400',
-  };
-
-  return (
-    <div onClick={() => onClick(id)} className={`cursor-pointer p-3 md:p-5 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${colors[color]}`}>
-      <div className="transition-transform group-hover:scale-110">{icon}</div>
-      <span className="text-[9px] md:text-[11px] font-black text-center">{label}</span>
     </div>
   );
 };

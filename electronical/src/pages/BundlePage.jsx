@@ -1,30 +1,67 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import useStore from '../store/UseStore';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { FaCheckCircle, FaGem, FaTshirt, FaGamepad, FaShoppingBag, FaArrowRight } from 'react-icons/fa';
+import { FaLayerGroup, FaArrowRight, FaShoppingBasket } from 'react-icons/fa';
 
 const BundlePage = () => {
   const { bundleId } = useParams();
-  const { products, addToCart } = useStore();
+  const { products, bundles, fetchBundles, addToCart } = useStore();
 
-  const bundlesData = {
-    "electronics-pack": { title: "عالم الإلكترونيات", subTitle: "أحدث التقنيات بخصم حقيقي", description: "باكدج تجمع لك بين الأداء القوي والتكنولوجيا المتطورة.", price: 299, oldPrice: 400, itemsIds: [9, 10, 11, 12], icon: <FaGamepad className="text-4xl" />, color: "from-blue-600 to-indigo-900" },
-    "winter-pack": { title: "أزياء الشتاء", subTitle: "أناقة ودفء في موسم واحد", description: "اخترنا لك أفضل القطع الشتوية التي تجمع بين المظهر العصري والجودة.", price: 99, oldPrice: 137, itemsIds: [15, 16, 17, 18], icon: <FaTshirt className="text-4xl" />, color: "from-orange-600 to-red-700" },
-    "beauty-corner": { title: "ركن الجمال", subTitle: "مجوهرات وعطور تليق بكِ", description: "بريق خاص لكل مناسبة مع تشكيلة المجوهرات والروائح الفاخرة.", price: 699, oldPrice: 880, itemsIds: [5, 6, 7, 8], icon: <FaGem className="text-4xl" />, color: "from-purple-600 to-pink-600" },
-    "friday-offers": { title: "عروض الجمعة", subTitle: "الخصومات الكبرى وصلت", description: "أكبر فرصة توفير في السنة على مجموعة متنوعة من أفضل المنتجات.", price: 60, oldPrice: 80, itemsIds: [19, 20, 3], icon: <FaShoppingBag className="text-4xl" />, color: "from-gray-800 to-black" }
+  // جلب البيانات من السيرفر عند تحميل الصفحة
+  useEffect(() => {
+    fetchBundles();
+  }, [fetchBundles]);
+
+  // البحث عن البكدج المطلوبة
+  const currentBundle = bundles.find(b => b.id === bundleId || b.id === parseInt(bundleId)) || bundles[0];
+
+  // تحويل IDs المنتجات لمصفوفة والبحث عن بياناتهم
+  const itemIdsArray = currentBundle?.items_ids 
+    ? currentBundle.items_ids.split(',').map(id => parseInt(id.trim())) 
+    : [];
+    
+  const bundleItems = products.filter(p => itemIdsArray.includes(parseInt(p.id)));
+
+  // دالة معالجة رابط الصورة (اللوجك الجديد)
+  const getFullImagePath = (imagePath) => {
+    if (!imagePath) return 'https://via.placeholder.com/300?text=No+Image';
+    
+    // 1. لو الرابط كامل بيبدأ بـ http (زي اللي عندك في الداتا بيز حالياً)
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // 2. لو الصورة عبارة عن كود Base64 (بتبدأ بـ data:)
+    if (imagePath.startsWith('data:')) {
+      return imagePath;
+    }
+    
+    // 3. لو الصورة مجرد اسم ملف (بتقرأ من فولدر uploads)
+    return `http://localhost:8080/electronical_backend/uploads/${imagePath}`;
   };
-
-  const currentBundle = bundlesData[bundleId] || bundlesData["electronics-pack"];
-  const bundleItems = products.filter(p => currentBundle.itemsIds.includes(p.id));
 
   const handleAddBundle = () => {
-    if (bundleItems.length === 0) { toast.error("المنتجات غير متوفرة"); return; }
+    if (bundleItems.length === 0) { 
+      toast.error("المنتجات غير متوفرة حالياً"); 
+      return; 
+    }
+    
     const discountPrice = (currentBundle.price / bundleItems.length).toFixed(2);
-    bundleItems.forEach(item => addToCart({ ...item, price: parseFloat(discountPrice), bundleName: currentBundle.title }));
-    toast.success(`تمت إضافة "${currentBundle.title}" للسلة! 🔥`);
+    
+    bundleItems.forEach(item => {
+      addToCart({ 
+        ...item, 
+        price: parseFloat(discountPrice), 
+        bundleName: currentBundle.bundle_name 
+      });
+    });
+    
+    toast.success(`تمت إضافة "${currentBundle.bundle_name}" للسلة! 🔥`);
   };
+
+  if (!currentBundle) return <div className="text-center py-40 font-black dark:text-white">جاري تحميل العرض...</div>;
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a] py-28 px-6 font-['Cairo'] text-right" dir="rtl">
@@ -34,54 +71,73 @@ const BundlePage = () => {
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          
           {/* الجانب الأيمن: تفاصيل العرض */}
           <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-5 space-y-8 sticky top-28">
-            <div className={`inline-flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r ${currentBundle.color} text-white shadow-xl shadow-indigo-100 dark:shadow-none`}>
-              {currentBundle.icon} <h4 className="font-black italic tracking-widest text-sm uppercase">Bundle Offer</h4>
+            <div className="inline-flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-700 text-white shadow-xl">
+              <FaLayerGroup className="text-3xl" /> 
+              <h4 className="font-black italic tracking-widest text-sm uppercase">عرض توفير خاص</h4>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-black dark:text-white leading-[1.2] tracking-tight">{currentBundle.title}</h1>
-            <p className="text-2xl text-indigo-600 dark:text-indigo-400 font-bold italic underline underline-offset-8 decoration-2">{currentBundle.subTitle}</p>
+            <h1 className="text-5xl md:text-6xl font-[1000] dark:text-white leading-[1.2] tracking-tight">
+                {currentBundle.bundle_name}
+            </h1>
             
-            {/* بوكس السعر الجديد */}
-            <div className="bg-gray-50 dark:bg-white/5 p-10 rounded-[3rem] border border-gray-100 dark:border-white/10 shadow-inner relative overflow-hidden">
-               <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-3xl"></div>
-               <span className="text-gray-400 line-through text-2xl font-light block mb-1">${currentBundle.oldPrice}</span>
-               <div className="flex items-center gap-3">
-                 <span className="text-7xl md:text-8xl font-black dark:text-white tracking-tighter">${currentBundle.price}</span>
-                 <span className="bg-red-500 text-white text-xs font-black px-3 py-1.5 rounded-lg shadow-lg rotate-3">خصم هائل</span>
+            <p className="text-xl text-gray-500 dark:text-gray-400 font-bold leading-relaxed">
+                وفرنا لك أفضل المنتجات في باكدج واحدة بسعر لا يقاوم. احصل على {bundleItems.length} قطع بخصم حقيقي.
+            </p>
+            
+            <div className="bg-gray-50 dark:bg-white/5 p-10 rounded-[3.5rem] border border-gray-100 dark:border-white/10 shadow-inner relative overflow-hidden">
+               <div className="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-3xl"></div>
+               <span className="text-gray-400 line-through text-2xl font-bold block mb-1">LE {currentBundle.old_price}</span>
+               <div className="flex items-center gap-4">
+                 <span className="text-7xl md:text-8xl font-[1000] text-indigo-700 dark:text-indigo-400 tracking-tighter">
+                    LE {currentBundle.price}
+                 </span>
+                 <div className="flex flex-col">
+                    <span className="bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-lg shadow-lg rotate-3 mb-1 text-center">وفر LE {currentBundle.old_price - currentBundle.price}</span>
+                    <span className="text-xs font-black text-gray-400 uppercase">سعر خاص</span>
+                 </div>
                </div>
             </div>
 
             <button 
               onClick={handleAddBundle} 
-              className="group relative w-full bg-gradient-to-r from-indigo-600 to-violet-700 text-white py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl shadow-indigo-200 dark:shadow-none hover:shadow-indigo-400 transition-all active:scale-95 overflow-hidden"
+              className="group relative w-full bg-indigo-600 text-white py-7 rounded-[2.5rem] font-[1000] text-2xl shadow-2xl shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-all active:scale-95 flex items-center justify-center gap-4"
             >
-               <span className="relative z-10">تفعيل العرض وإضافة للسلة 🚀</span>
-               <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+               <span>أضف الباكدج للسلة</span>
+               <FaShoppingBasket />
             </button>
           </motion.div>
 
           {/* الجانب الأيسر: كروت المنتجات */}
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-8">
             {bundleItems.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-white/5 p-8 rounded-[3rem] border border-gray-100 dark:border-white/10 flex flex-col items-center group relative hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:hover:shadow-none hover:-translate-y-2 transition-all duration-500">
-                {/* Badge التوفر الجديد */}
+              <div key={item.id} className="bg-white dark:bg-white/5 p-8 rounded-[3.5rem] border border-gray-100 dark:border-white/10 flex flex-col items-center group relative hover:shadow-2xl transition-all duration-500">
+                
                 <div className="absolute top-6 right-6 z-10">
-                    <div className="flex items-center gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 px-4 py-2 rounded-full text-[10px] font-black border border-green-500/20 backdrop-blur-sm">
-                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        مشمول في الباكدج
+                    <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-4 py-2 rounded-full text-[10px] font-black border border-indigo-100 dark:border-indigo-800/50 backdrop-blur-sm">
+                        <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
+                        مشمول في العرض
                     </div>
                 </div>
 
-                {/* الصورة وتأثيرها */}
-                <div className="h-60 w-full flex items-center justify-center mb-6 bg-gray-50/50 dark:bg-black/20 rounded-[2rem] overflow-hidden">
-                    <img src={item.image} alt={item.title} className="h-44 object-contain group-hover:scale-110 transition-transform duration-500 mix-blend-multiply dark:mix-blend-normal" />
+                <div className="h-64 w-full flex items-center justify-center mb-6 bg-gray-50/50 dark:bg-white/5 rounded-[3rem] overflow-hidden group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/10 transition-colors">
+                    <img 
+                      src={getFullImagePath(item.image)} 
+                      alt={item.title} 
+                      className="h-48 object-contain group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500" 
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/300?text=Image+Not+Found';
+                      }}
+                    />
                 </div>
 
-                <h3 className="text-base font-bold dark:text-gray-200 text-center line-clamp-2 h-12 mb-4 px-2 leading-relaxed tracking-wide">
-                    {item.title}
+                <h3 className="text-lg font-black dark:text-gray-100 text-center line-clamp-2 h-14 mb-2 px-2 leading-tight">
+                    {item.title || item.name}
                 </h3>
+                <span className="text-indigo-600 dark:text-indigo-400 font-black text-sm">قطعة مميزة</span>
               </div>
             ))}
           </motion.div>

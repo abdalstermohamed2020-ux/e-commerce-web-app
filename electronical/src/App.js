@@ -34,6 +34,7 @@ import ManageSales from './pages/ManageSales';
 import Profile from './pages/Profile';
 import MyOrders from './pages/MyOrders';
 import Returns from './pages/Returns';
+import ManageBundles from './pages/ManageBundles'; 
 
 // مكون إضافي للفصل بين الموقع العام ولوحة التحكم
 const MainLayout = ({ children }) => (
@@ -46,12 +47,23 @@ const MainLayout = ({ children }) => (
 );
 
 function App() {
-  const { darkMode } = useStore();
-const fetchProductsFromDB = useStore((state) => state.fetchProductsFromDB);
+  const { darkMode, fetchProductsFromDB } = useStore();
 
   useEffect(() => {
-    fetchProductsFromDB(); // نداء للـ API بتاع الـ PHP
+    fetchProductsFromDB(); // جلب المنتجات عند فتح التطبيق
   }, [fetchProductsFromDB]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        window.location.href = '/admin-login';
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
   
   return (
     <div className={`${darkMode ? 'dark' : ''}`}>
@@ -73,7 +85,7 @@ const fetchProductsFromDB = useStore((state) => state.fetchProductsFromDB);
             <Route path="/electronics" element={<MainLayout><Electronics /></MainLayout>} />
             <Route path="/jewelry" element={<MainLayout><Jewelry /></MainLayout>} />
             <Route path="/about" element={<MainLayout><About /></MainLayout>} />
-            <Route path="/bundles/:bundleId" element={<MainLayout><BundlePage /></MainLayout>} />
+            <Route path="/bundle/:bundleId" element={<MainLayout><BundlePage /></MainLayout>} />   
             <Route path="/mens-clothing" element={<MainLayout><CategoryPage category="men's clothing" title="ملابس رجالي" /></MainLayout>} />
             <Route path="/womens-clothing" element={<MainLayout><CategoryPage category="women's clothing" title="ملابس حريمي" /></MainLayout>} />
             <Route path="/all-offers" element={<MainLayout><OffersPage /></MainLayout>} />
@@ -82,29 +94,34 @@ const fetchProductsFromDB = useStore((state) => state.fetchProductsFromDB);
             <Route path="/my-orders" element={<MainLayout><MyOrders /></MainLayout>} />
             <Route path="/returns" element={<MainLayout><Returns /></MainLayout>} />
 
-            {/* صفحة دخول الأدمين (بره الحماية وبره الـ MainLayout) */}
-          <Route path="/admin-login" element={<AdminLogin />} />
+            {/* صفحة دخول الأدمين */}
+            <Route path="/admin-login" element={<AdminLogin />} />
             
-            {/* 2. مسارات لوحة التحكم (المحمة بالـ ProtectedRoute) */}
+            {/* 2. مسارات لوحة التحكم المحمية */}
             <Route 
-  path="/secret-portal-mis" 
-  element={
-    <ProtectedRoute>
-      {/* هنا بنحط المكون الرئيسي للوحة التحكم */}
-      <AdminDashboard /> 
-    </ProtectedRoute>
-  }
->
-  {/* المسارات الفرعية (تظهر داخل الـ Dashboard لو استخدمت Outlet) */}
-  <Route path="products" element={<ManageProducts />} />
-  <Route path="orders" element={<ManageOrders />} />
-  <Route path="returns" element={<ManageReturns />} />
-  <Route path="sales" element={<ManageSales />} />
-</Route>
-            {/* صفحة 404 (اختياري) */}
-<Route path="*" element={<div className="text-center py-20 dark:text-white font-bold text-4xl italic">
-  404 - الصفحة غير موجودة يا هندسة 😅</div>} />
-  </Routes>
+              path="/secret-portal-mis" 
+              element={
+                <ProtectedRoute>
+                  <AdminLayout /> 
+                </ProtectedRoute>
+              }
+            >
+              {/* index تعني صفحة الإحصائيات (Dashboard) */}
+              <Route index element={<AdminDashboard />} /> 
+              <Route path="products" element={<ManageProducts />} />
+              <Route path="orders" element={<ManageOrders />} />
+              <Route path="returns" element={<ManageReturns />} />
+              
+              {/* --- المسار الجديد لصفحة المبيعات --- */}
+              <Route path="sales" element={<ManageSales />} />
+              
+              <Route path="manage-bundles" element={<ManageBundles />} />
+            </Route>
+
+            {/* صفحة 404 */}
+            <Route path="*" element={<div className="text-center py-20 dark:text-white font-bold text-4xl italic">
+              404 - الصفحة غير موجودة يا هندسة 😅</div>} />
+          </Routes>
 
         </div>
       </Router>

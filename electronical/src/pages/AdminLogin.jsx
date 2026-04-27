@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import useStore from '../store/UseStore';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { FaUserShield, FaLock, FaUserAlt } from 'react-icons/fa';
+import useStore from '../store/UseStore';
 import { toast } from 'react-hot-toast';
 
 const AdminLogin = () => {
@@ -14,72 +12,64 @@ const AdminLogin = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     const result = loginAdmin(username, password);
-    
     if (result.success) {
-      // رسالة نجاح
-      toast.success(result.message || "تم تسجيل الدخول بنجاح! جاري التحويل...");
-      
-      // تأخير بسيط عشان نضمن تحديث الـ State في الـ Store ومنع صفحة الـ Error
-      setTimeout(() => {
-        navigate('/secret-portal-mis'); 
-      }, 1000);
+      toast.success(result.message);
+      navigate('/secret-portal-mis');
     } else {
-      // رسالة خطأ واضحة (جديد)
-      toast.error(result.message || "بيانات الدخول غير صحيحة!");
+      toast.error(result.message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4" dir="rtl">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl p-10 border-t-8 border-indigo-600"
-      >
-        <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FaUserShield size={40} />
-          </div>
-          <h2 className="text-3xl font-black dark:text-white">دخول الإدارة</h2>
-          <p className="text-gray-500 mt-2 text-sm italic">برجاء إدخال بيانات الوصول المؤمنة</p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-2">دخول الأدمن</h1>
+          <p className="text-gray-600 dark:text-gray-400">أدخل بياناتك للدخول إلى لوحة التحكم</p>
         </div>
-
+        
         <form onSubmit={handleLogin} className="space-y-6">
-          <div className="relative">
-            {/* أيقونة اليوزر بقيت في الشمال عشان dir="rtl" */}
-            <FaUserAlt className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="اسم المستخدم" 
-              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-gray-700 dark:text-white border border-transparent focus:border-indigo-500 outline-none transition-all font-bold"
+          <div>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">اسم المستخدم</label>
+            <input
+              type="text"
+              value={username}
               onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              placeholder="أدخل اسم المستخدم"
               required
             />
           </div>
-
-          <div className="relative">
-            <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              type="password" 
-              placeholder="كلمة المرور" 
-              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-gray-700 dark:text-white border border-transparent focus:border-indigo-500 outline-none transition-all font-bold"
+          
+          <div>
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">كلمة المرور</label>
+            <input
+              type="password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              placeholder="أدخل كلمة المرور"
               required
             />
           </div>
-
-          <button 
-            type="submit" 
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-2xl font-black text-lg shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-95"
+          
+          <button
+            type="submit"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105"
           >
-            تسجيل الدخول
+            دخول
           </button>
         </form>
-
-        <p className="text-center mt-8 text-xs text-gray-400">
-          نظام إدارة متجر MIS - 2026
-        </p>
-      </motion.div>
+        
+        <div className="text-center mt-6">
+          <button
+            onClick={() => navigate('/')}
+            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold"
+          >
+            العودة للصفحة الرئيسية
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

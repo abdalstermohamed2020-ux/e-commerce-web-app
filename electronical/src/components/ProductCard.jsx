@@ -48,7 +48,6 @@ const ProductCard = ({ product }) => {
         </div>
         
         {/* التعديل هنا لظهور الاسم على الكارت */}
-        // داخل ملف ProductCard.jsx
       <h2 className="font-bold text-sm dark:text-white line-clamp-2 h-10 mb-2 text-right">
       {product.name || product.title} 
       </h2>

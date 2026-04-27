@@ -11,7 +11,6 @@ const MyOrders = () => {
     const user = JSON.parse(localStorage.getItem('user'));
 
     useEffect(() => {
-        // فحص تسجيل الدخول مرة واحدة عند التحميل
         if (!user || !user.id) {
             toast.error("يرجى تسجيل الدخول أولاً لعرض طلباتك");
             navigate('/login');
@@ -31,7 +30,7 @@ const MyOrders = () => {
         };
 
         fetchOrders();
-    }, []); // المصفوفة الفارغة تمنع تكرار الرسائل
+    }, []);
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -84,9 +83,19 @@ const MyOrders = () => {
                                     </div>
 
                                     <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
-                                        <div className="text-right">
+                                        <div className="text-left md:text-right">
                                             <p className="text-gray-500 text-xs mb-1">المبلغ الإجمالي</p>
-                                            <p className="text-2xl font-black text-indigo-400">{order.total_price} <span className="text-sm">LE</span></p>
+                                            <div className="flex flex-col items-start md:items-end">
+                                                {/* لو فيه خصم (السعر الأصلي أكبر من النهائي) اظهر السعر مشطوب */}
+                                                {parseFloat(order.subtotal) > parseFloat(order.total_price) && (
+                                                    <span className="text-sm font-bold text-gray-500 line-through decoration-red-500 decoration-2 italic">
+                                                        LE {parseFloat(order.subtotal).toLocaleString()}
+                                                    </span>
+                                                )}
+                                                <p className="text-2xl font-black text-indigo-400 italic">
+                                                    LE {parseFloat(order.total_price).toLocaleString()}
+                                                </p>
+                                            </div>
                                         </div>
                                         <div className={`px-4 py-2 rounded-xl border text-xs font-bold flex items-center gap-2 ${getStatusStyle(order.status)}`}>
                                             {order.status === 'تم التوصيل' ? <CheckCircle size={14} /> : <Clock size={14} />}

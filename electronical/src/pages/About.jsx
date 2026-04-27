@@ -2,19 +2,19 @@ import React from 'react';
 import useStore from '../store/UseStore'; 
 import { useNavigate } from 'react-router-dom';
 import { FaRocket, FaUsers, FaShieldAlt, FaStar, FaQuoteRight } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const About = () => {
   const { products } = useStore();
   const navigate = useNavigate();
 
-  // بيانات الإحصائيات (Stats)
+  // بيانات الإحصائيات
   const stats = [
     { id: 1, label: "عميل سعيد", value: "+10,000", icon: <FaUsers className="text-blue-500" /> },
     { id: 2, label: "منتج أصلي", value: "+5,000", icon: <FaShieldAlt className="text-green-500" /> },
     { id: 3, label: "توصيل سريع", value: "24h", icon: <FaRocket className="text-orange-500" /> },
   ];
 
-  // بيانات العملاء والتعليقات
   const customerNames = ["أحمد علي", "سارة حسن", "محمود كريم", "ليلى يوسف", "ياسين محمد", "نورا خالد", "حمزة رضوان", "مريم إبراهيم", "عمر فاروق", "هناء سيد"];
   const comments = [
     "الجودة ممتازة جداً والتوصيل سريع", "أفضل متجر إلكترونيات تعاملت معه", "المنتج أصلي والتغليف محترم", 
@@ -22,7 +22,6 @@ const About = () => {
     "الكيبورد مريح جداً في الكتابة", "أنصح الجميع بالتعامل معهم", "تجربة شراء سلسة وسهلة", "شكراً لكم على هذه الأمانة"
   ];
 
-  // ربط الـ 10 آراء بمنتجات الـ API
   const testimonials = products.slice(0, 10).map((product, index) => ({
     id: product.id,
     name: customerNames[index] || `عميل ${index + 1}`,
@@ -33,86 +32,112 @@ const About = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300 text-right font-sans pb-20">
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300 text-right font-['Cairo'] pb-20" dir="rtl">
       
-      {/* 1. Hero Section (التنسيق الأول) */}
-      <section className="relative py-24 bg-indigo-600 dark:bg-indigo-900 text-white overflow-hidden">
+      {/* 1. Hero Section */}
+      <section className="relative py-32 bg-gradient-to-br from-indigo-700 via-indigo-600 to-purple-700 text-white overflow-hidden">
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <h1 className="text-5xl font-black mb-6">عن <span className="text-yellow-400">Shopify Store</span></h1>
-          <p className="text-xl max-w-2xl mx-auto opacity-90 leading-relaxed">
-            وجهتك الأولى للحصول على أحدث التقنيات العالمية بأعلى جودة وأفضل خدمة ما بعد البيع.
-          </p>
-          <button 
-            onClick={() => navigate('/')}
-            className="btn-liquid mt-8 px-10 py-3 bg-white text-indigo-600 font-bold rounded-xl shadow-lg hover:scale-105 transition-transform"
+          <motion.h1 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="text-6xl font-black mb-6 tracking-tighter"
           >
-            تصفح منتجاتنا
-          </button>
+            عن <span className="text-yellow-400">Shopify Store</span>
+          </motion.h1>
+          <motion.p 
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-xl max-w-2xl mx-auto opacity-90 leading-relaxed font-bold"
+          >
+            نحن لسنا مجرد متجر، نحن شريكك التقني الموثوق لتوفير أحدث الابتكارات بأفضل الأسعار.
+          </motion.p>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/')}
+            className="mt-10 px-12 py-4 bg-white text-indigo-600 font-black rounded-2xl shadow-2xl hover:bg-yellow-400 hover:text-indigo-900 transition-all uppercase tracking-wider"
+          >
+            ابدأ التسوق الآن
+          </motion.button>
         </div>
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        
+        {/* Decorative Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[120px] -mr-48 -mt-48"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[80px] -ml-32 -mb-32"></div>
       </section>
 
-      {/* 2. Stats Section (الأرقام) */}
-      <section className="py-12 -mt-12 relative z-20">
+      {/* 2. Stats Section */}
+      <section className="py-12 -mt-16 relative z-20">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {stats.map((stat) => (
-              <div key={stat.id} className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center transform hover:-translate-y-2 transition-all">
-                <div className="text-4xl mb-4">{stat.icon}</div>
-                <h3 className="text-3xl font-bold dark:text-white mb-2">{stat.value}</h3>
-                <p className="text-gray-500 dark:text-gray-400 font-medium">{stat.label}</p>
-              </div>
+              <motion.div 
+                whileHover={{ y: -10 }}
+                key={stat.id} 
+                className="bg-white dark:bg-gray-800 p-8 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-gray-700 flex flex-col items-center"
+              >
+                <div className="text-5xl mb-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-2xl">{stat.icon}</div>
+                <h3 className="text-4xl font-black dark:text-white mb-2 tracking-tighter">{stat.value}</h3>
+                <p className="text-gray-500 dark:text-gray-400 font-black italic uppercase text-sm">{stat.label}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 3. Testimonials Section (الـ 10 آراء بالمنتجات) */}
-      <section className="py-20 container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold dark:text-white">ثقة <span className="text-indigo-600">عملائنا</span></h2>
-          <p className="text-gray-500 mt-2">آراء حقيقية من أشخاص جربوا منتجاتنا</p>
+      {/* 3. Testimonials Section */}
+      <section className="py-24 container mx-auto px-4">
+        <div className="text-center mb-20">
+          <h2 className="text-5xl font-black dark:text-white mb-4">قصص <span className="text-indigo-600 italic">النجاح</span></h2>
+          <div className="w-24 h-2 bg-yellow-400 mx-auto rounded-full"></div>
+          <p className="text-gray-500 mt-6 font-bold text-lg">نعتز بآراء أكثر من 10,000 عميل حول العالم</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {testimonials.map((item) => (
-            <div 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-7xl mx-auto">
+          {testimonials.map((item, index) => (
+            <motion.div 
+              initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
               key={item.id} 
-              className="bg-gray-50 dark:bg-gray-800 p-6 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 flex flex-col lg:flex-row items-center gap-6 hover:shadow-2xl transition-all group shadow-sm"
+              className="bg-white dark:bg-gray-800 p-8 rounded-[3rem] border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center gap-8 hover:shadow-3xl transition-all group shadow-xl relative overflow-hidden"
             >
-              {/* صورة المنتج من الـ API */}
-              <div className="w-36 h-36 flex-shrink-0 bg-white rounded-3xl p-3 shadow-inner relative flex items-center justify-center">
+              {/* صورة المنتج */}
+              <div className="w-40 h-40 flex-shrink-0 bg-white rounded-[2rem] p-4 shadow-inner relative flex items-center justify-center border border-gray-50">
                 <img 
                   src={item.productImage} 
                   alt={item.productName} 
-                  className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                  className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-700 mix-blend-multiply"
                 />
-                <div className="absolute -bottom-2 bg-lime-600 text-white text-[9px] px-2 py-1 rounded-full font-bold shadow-md">
-                  تم الشراء
+                <div className="absolute -top-3 -right-3 bg-indigo-600 text-white text-[10px] px-3 py-1.5 rounded-full font-black shadow-lg">
+                  موصى به
                 </div>
               </div>
 
               {/* محتوى الرأي */}
               <div className="flex-grow">
-                <div className="flex items-center mb-4">
-                  <img src={item.avatar} alt="" className="w-12 h-12 rounded-full ml-3 border-2 border-indigo-500 p-0.5" />
-                  <div className="text-right">
-                    <h4 className="font-bold dark:text-white text-base">{item.name}</h4>
-                    <p className="text-indigo-500 text-[11px] font-medium truncate w-48">{item.productName}</p>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <img src={item.avatar} alt="" className="w-14 h-14 rounded-2xl ml-4 border-2 border-indigo-500 shadow-md" />
+                    <div className="text-right">
+                      <h4 className="font-black dark:text-white text-lg">{item.name}</h4>
+                      <p className="text-indigo-500 text-xs font-bold truncate max-w-[150px] italic">{item.productName}</p>
+                    </div>
                   </div>
-                  <div className="mr-auto text-yellow-400 flex text-xs gap-0.5">
-                    {[...Array(5)].map((_, i) => <FaStar key={i} />)}
+                  <div className="flex text-yellow-400 gap-1 bg-yellow-50 dark:bg-gray-700 px-3 py-1.5 rounded-xl">
+                    {[...Array(5)].map((_, i) => <FaStar key={i} size={12} />)}
                   </div>
                 </div>
                 
                 <div className="relative">
-                  <FaQuoteRight className="absolute -right-3 -top-3 text-indigo-100 dark:text-gray-700 text-4xl opacity-50" />
-                  <p className="text-gray-600 dark:text-gray-300 text-sm italic leading-relaxed pr-5 relative z-10">
-                    {item.comment}
+                  <FaQuoteRight className="absolute -right-4 -top-6 text-indigo-500/10 dark:text-white/5 text-6xl" />
+                  <p className="text-gray-600 dark:text-gray-300 text-md font-bold leading-relaxed pr-4 relative z-10 italic">
+                    "{item.comment}"
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
