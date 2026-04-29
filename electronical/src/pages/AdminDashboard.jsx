@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import useStore from '../store/UseStore';
-import { FaDollarSign, FaBoxOpen, FaShoppingCart, FaUndo, FaChartBar, FaBox, FaLayerGroup } from 'react-icons/fa'; // أضفنا أيقونة البكدجات
+import { FaDollarSign, FaBoxOpen, FaShoppingCart, FaUndo } from 'react-icons/fa'; // أضفنا أيقونة البكدجات
 
 const AdminDashboard = () => {
   const { products, orders, returns } = useStore();

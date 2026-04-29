@@ -19,8 +19,8 @@ const Cart = () => {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
   const [couponInput, setCouponInput] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [isSubmitting] = useState(false);
+  
   const suggestions = products
     .filter(p => !cart.find(item => item.id === p.id))
     .slice(0, 4);

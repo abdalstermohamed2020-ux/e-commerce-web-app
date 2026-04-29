@@ -9,7 +9,8 @@ const Electronics = () => {
 
   useEffect(() => {
     fetchProductsFromDB(); // إعادة جلب في كل مرة تدخل الصفحة
-  }, []);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   const filtered = Array.isArray(products)
     ? products.filter((p) => {
