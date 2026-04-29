@@ -39,8 +39,8 @@ useEffect(() => {
         gender: user.gender || 'male'
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [user]);
 
   const fetchOrders = async () => {
     if (!user?.id) return;
@@ -62,8 +62,8 @@ useEffect(() => {
     if (activeTab === 'orders') {
       fetchOrders();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, user?.id]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [activeTab, user?.id]);
   
   const handleUpdate = async (e) => {
     e.preventDefault();

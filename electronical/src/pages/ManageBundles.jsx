@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useStore from '../store/UseStore';
-import { FaPlus, FaTrash, FaCheckCircle, FaLayerGroup } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaLayerGroup } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import Swal from 'sweetalert2';
 
@@ -152,7 +152,7 @@ const ManageBundles = () => {
             <div className="flex-1 bg-gradient-to-br from-indigo-50/50 to-white dark:from-gray-800 dark:to-gray-900 p-10 flex items-center justify-center relative min-h-[380px]">
               <div className="grid grid-cols-2 gap-6 w-full max-w-sm relative z-10">
                 {bundle.items_ids && bundle.items_ids.split(',').slice(0, 4).map((id, index) => {
-                  const prod = products.find(p => p.id == id);
+                  const prod = products.find(p => p.id === id);
                   return (
                     <div 
                       key={index} 

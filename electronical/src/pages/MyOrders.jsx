@@ -30,7 +30,8 @@ const MyOrders = () => {
             }
         };
         fetchOrders(); 
-    }, []); 
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
     const getStatusStyle = (status) => {
         switch (status) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaCheckCircle, FaBox, FaHome } from 'react-icons/fa';
+import { FaCheckCircle, FaHome } from 'react-icons/fa';
 
 const Success = () => {
   const navigate = useNavigate();

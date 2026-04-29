@@ -10,7 +10,8 @@ const ManageOrders = () => {
   // جلب البيانات من السيرفر عند تحميل الصفحة
   useEffect(() => {
     fetchAllOrdersFromDB();
-  }, []);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   // التأكد من أن orders مصفوفة قبل عمل الفلترة لتجنب خطأ undefined
   const activeOrders = Array.isArray(orders) ? orders.filter(o => o.status === 'pending') : [];
