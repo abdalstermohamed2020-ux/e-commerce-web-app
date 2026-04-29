@@ -24,10 +24,10 @@ const Footer = () => {
               وجهتك الأولى لأحدث الأجهزة والإكسسوارات في مصر. جودة مضمونة، توصيل سريع، وأفضل الأسعار.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-xl hover:bg-sky-600 hover:text-white transition-all"><FaFacebookF /></a>
-              <a href="#" className="w-10 h-10 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-xl hover:bg-pink-600 hover:text-white transition-all"><FaInstagram /></a>
-              <a href="#" className="w-10 h-10 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-xl hover:bg-green-600 hover:text-white transition-all"><FaWhatsapp /></a>
-              <a href="#" className="w-10 h-10 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-xl hover:bg-sky-400 hover:text-white transition-all"><FaLinkedin /></a>
+              <a href="https://www.facebook.com/abdulsattar.mohamed.936143" className="w-10 h-10 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-xl hover:bg-sky-600 hover:text-white transition-all"><FaFacebookF /></a>
+              <a href="https://www.instagram.com/absattar_1426h?igsh=bTZmY3VvbDE0N2Z2" className="w-10 h-10 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-xl hover:bg-pink-600 hover:text-white transition-all"><FaInstagram /></a>
+              <a href="https://web.whatsapp.com/" className="w-10 h-10 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-xl hover:bg-green-600 hover:text-white transition-all"><FaWhatsapp /></a>
+              <a href="https://www.linkedin.com/in/abdullsattar-mohamed-948a91377/" className="w-10 h-10 bg-gray-100 dark:bg-gray-800 flex items-center justify-center rounded-xl hover:bg-sky-400 hover:text-white transition-all"><FaLinkedin /></a>
             </div>
           </div>
 
@@ -83,8 +83,8 @@ const Footer = () => {
         <div className="pt-8 border-t dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
           <p>© {currentYear} جميع الحقوق محفوظة لـ <span className="text-indigo-600 font-bold">Shopify Store</span></p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-indigo-600">سياسة الخصوصية</a>
-            <a href="#" className="hover:text-indigo-600">شروط الاستخدام</a>
+            <a href="/" className="hover:text-indigo-600">سياسة الخصوصية</a>
+            <a href="/" className="hover:text-indigo-600">شروط الاستخدام</a>
           </div>
         </div>
 

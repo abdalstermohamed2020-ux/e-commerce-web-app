@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import useStore from '../store/UseStore';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaTrash, FaPlus, FaMinus, FaShoppingBag, 
-  FaArrowRight, FaCreditCard, FaTrashAlt, 
-  FaExclamationTriangle, FaTicketAlt, FaCheck, FaLightbulb 
+  FaArrowRight, FaCreditCard, FaTrashAltss, FaLightbulb 
 } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 

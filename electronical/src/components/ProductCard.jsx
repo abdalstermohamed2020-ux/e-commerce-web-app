@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import useStore from '../store/UseStore';
 import { motion } from 'framer-motion';
-import { FaStar, FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
