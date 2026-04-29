@@ -8,22 +8,24 @@ import { toast } from 'react-hot-toast';
 const ProductCard = ({ product }) => {
   const { addToCart } = useStore();
 
+  // --- التعديل هنا لتركيب رابط الصورة الصحيح ---
+  const fullImagePath = `http://electronic-api.atwebpages.com/uploads/${product.image}`;
+
   const handleAdd = (e) => {
     e.preventDefault();
     addToCart(product);
     
-    // رسالة Toast مخصصة
     toast.custom((t) => (
       <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white dark:bg-gray-800 shadow-2xl rounded-3xl pointer-events-auto flex ring-1 ring-black ring-opacity-5 border-r-4 border-indigo-600 p-4`} dir="rtl">
         <div className="flex-shrink-0">
-          <img className="h-12 w-12 rounded-lg object-contain bg-gray-100" src={product.image} alt={product.name} />
+          {/* تم تعديل src هنا */}
+          <img className="h-12 w-12 rounded-lg object-contain bg-gray-100" src={fullImagePath} alt={product.name} />
         </div>
         <div className="mr-4 flex-1">
           <p className="text-sm font-black text-gray-900 dark:text-white">
             خيار ممتاز! 🔥
           </p>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {/* التعديل هنا: استخدام name بدلاً من title */}
             أضفنا {product.name ? product.name.slice(0, 20) : "المنتج"}... لسلتك بنجاح.
           </p>
         </div>
@@ -44,10 +46,10 @@ const ProductCard = ({ product }) => {
     >
       <Link to={`/product/${product.id}`} className="block">
         <div className="h-48 mb-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 flex items-center justify-center">
-          <img src={product.image} alt={product.name} className="max-h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+          {/* تم تعديل src هنا أيضاً */}
+          <img src={fullImagePath} alt={product.name} className="max-h-full object-contain group-hover:scale-110 transition-transform duration-500" />
         </div>
         
-        {/* التعديل هنا لظهور الاسم على الكارت */}
       <h2 className="font-bold text-sm dark:text-white line-clamp-2 h-10 mb-2 text-right">
       {product.name || product.title} 
       </h2>
