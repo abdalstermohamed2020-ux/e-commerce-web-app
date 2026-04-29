@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaTrash, FaPlus, FaMinus, FaShoppingBag, 
-  FaArrowRight, FaCreditCard, FaTrashAltss, FaLightbulb 
+  FaArrowRight, FaCreditCard, FaTrashAltss, FaLightbulb, FaTrashAlt
 } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
@@ -19,7 +19,7 @@ const Cart = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [isSubmitting] = useState(false);
-  
+
   const suggestions = products
     .filter(p => !cart.find(item => item.id === p.id))
     .slice(0, 4);
