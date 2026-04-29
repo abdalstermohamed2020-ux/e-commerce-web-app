@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import useStore from '../store/UseStore';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { FaTag, FaLayerGroup, FaCartPlus, FaInfoCircle } from 'react-icons/fa';
+import { FaTag, FaCartPlus } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
 const OffersPage = () => {

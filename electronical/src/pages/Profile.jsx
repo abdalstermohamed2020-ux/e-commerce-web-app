@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { 
-  FaSignOutAlt, FaStar, FaHistory, FaGift, FaBoxOpen, 
-  FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaUserCircle
+  FaSignOutAlt, FaStar, FaHistory, FaBoxOpen, 
+  FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/UseStore';
@@ -27,7 +27,7 @@ const Profile = () => {
     gender: user?.gender || 'male'
   });
 
-  useEffect(() => {
+useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || '',
@@ -39,6 +39,7 @@ const Profile = () => {
         gender: user.gender || 'male'
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchOrders = async () => {
@@ -61,8 +62,9 @@ const Profile = () => {
     if (activeTab === 'orders') {
       fetchOrders();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, user?.id]);
-
+  
   const handleUpdate = async (e) => {
     e.preventDefault();
     const loadingToast = toast.loading('جاري حفظ التعديلات...');
