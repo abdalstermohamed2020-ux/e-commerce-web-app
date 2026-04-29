@@ -11,7 +11,7 @@ const Returns = () => {
         const fetchReturns = async () => {
             if (user?.id) {
                 try {
-                    const res = await axios.get(`http://localhost:8080/electronical_backend/get_user_orders.php?user_id=${user.id}`);
+                    const res = await axios.get(`[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/get_user_orders.php?user_id=${user.id}`);
                     const onlyReturns = res.data.filter(order => order.status === 'مرتجع');
                     setReturns(onlyReturns);
                 } catch (err) {

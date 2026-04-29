@@ -39,7 +39,7 @@ const BundlePage = () => {
     }
     
     // 3. لو الصورة مجرد اسم ملف (بتقرأ من فولدر uploads)
-    return `http://localhost:8080/electronical_backend/uploads/${imagePath}`;
+    return `[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/uploads/${imagePath}`;
   };
 
   const handleAddBundle = () => {

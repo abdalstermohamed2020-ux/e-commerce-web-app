@@ -32,8 +32,8 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const url = isLogin 
-            ? 'http://localhost:8080/electronical_backend/login.php' 
-            : 'http://localhost:8080/electronical_backend/signup.php';
+            ? '[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/login.php' 
+            : '[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/signup.php';
 
         try {
             const response = await axios.post(url, formData);

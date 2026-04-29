@@ -47,7 +47,7 @@ useEffect(() => {
     setLoadingOrders(true);
     try {
       const response = await axios.get(
-        `http://localhost:8080/electronical_backend/get_user_orders.php?user_id=${user.id}`
+        `[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/get_user_orders.php?user_id=${user.id}`
       );
       setOrders(Array.isArray(response.data) ? response.data : []);
     } catch (error) {

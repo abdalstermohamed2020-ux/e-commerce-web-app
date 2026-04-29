@@ -24,7 +24,7 @@ const ManageBundles = () => {
     if (imagePath.startsWith('data:')) return imagePath; 
     
     // لو اسم ملف فقط، نضيف مسار السيرفر
-    return `http://localhost:8080/electronical_backend/uploads/${imagePath}`;
+    return `[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/uploads/${imagePath}`;
   };
 
   const toggleProductSelection = (id) => {

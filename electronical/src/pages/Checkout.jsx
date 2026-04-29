@@ -70,7 +70,7 @@ const Checkout = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/electronical_backend/place_order.php', orderPayload);
+      const response = await axios.post('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/place_order.php', orderPayload);
       
       if (response.data.status === 'success') {
         if (user?.id) await fetchUserOrdersFromDB(user.id);

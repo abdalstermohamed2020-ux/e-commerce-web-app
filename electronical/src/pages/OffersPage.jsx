@@ -17,7 +17,7 @@ const OffersPage = () => {
     if (!imagePath) return 'https://via.placeholder.com/300?text=No+Image';
     if (imagePath.startsWith('http')) return imagePath;
     if (imagePath.startsWith('data:')) return imagePath;
-    return `http://localhost:8080/electronical_backend/uploads/${imagePath}`;
+    return `[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/uploads/${imagePath}`;
   };
 
   // 🔥 الدالة الجديدة للإضافة الفورية للسلة

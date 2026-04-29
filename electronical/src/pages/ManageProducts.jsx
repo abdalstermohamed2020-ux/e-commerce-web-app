@@ -26,7 +26,7 @@ const ManageProducts = () => {
   });
 
   const { addProduct, updateProduct } = useStore();
-  const API_BASE_URL = "http://localhost:8080/electronical_backend";
+  const API_BASE_URL = "[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)";
 
   // --- 1. جلب البيانات ---
   const fetchProducts = async () => {
