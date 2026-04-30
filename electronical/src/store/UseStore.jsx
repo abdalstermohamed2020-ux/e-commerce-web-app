@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios from 'axios';
 
+const BASE_URL = 'https://electronic-api.atwebpages.com';
+
 const normalizeArray = (value) => (Array.isArray(value) ? value : []);
 
 const getProductsFromResponse = (data) => {
