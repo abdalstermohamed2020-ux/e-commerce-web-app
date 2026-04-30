@@ -9,7 +9,7 @@ const ProductCard = ({ product }) => {
   const { addToCart } = useStore();
 
   // --- التعديل هنا لتركيب رابط الصورة الصحيح ---
-  const fullImagePath = `http://electronic-api.atwebpages.com/uploads/${product.image}`;
+const fullImagePath = `http://electronic-api.atwebpages.com/uploads/product_1776980066.jpeg`;
 
   const handleAdd = (e) => {
     e.preventDefault();

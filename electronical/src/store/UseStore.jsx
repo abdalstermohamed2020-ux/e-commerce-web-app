@@ -34,7 +34,7 @@ const useStore = create(
 
       clearReturnsFromDB: async () => {
         try {
-          const response = await axios.delete('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/delete_order.php');
+          const response = await axios.delete('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/delete_order.php');
           if (response.data.status === 'success') {
             set({ returns: [] });
             return { success: true, message: response.data.message };
@@ -48,7 +48,7 @@ const useStore = create(
 
       addProduct: async (productData) => {
         try {
-          const response = await axios.post('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/admin_products.php', productData);
+          const response = await axios.post('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/admin_products.php', productData);
           if (response.data.status === 'success') {
             return { success: true, message: response.data.message };
           } else {
@@ -61,9 +61,10 @@ const useStore = create(
       },
 
       // --- وظائف الباندلز (Bundles) ---
-      fetchBundles: async () => {
+     fetchBundles: async () => {
         try {
-          const response = await axios.get('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/admin_bundles.php');
+          // استخدام HTTPS و BASE_URL
+          const response = await axios.get(`${BASE_URL}/get_bundles.php`); 
           set({ bundles: Array.isArray(response.data) ? response.data : [] });
         } catch (error) {
           console.error("Fetch Bundles Error:", error);
@@ -73,7 +74,7 @@ const useStore = create(
 
       addBundle: async (bundleData) => {
         try {
-          const response = await axios.post('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/admin_bundles.php', bundleData);
+          const response = await axios.post('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/admin_bundles.php', bundleData);
           if (response.data.status === 'success') {
             get().fetchBundles();
             return { success: true, message: response.data.message };
@@ -87,7 +88,7 @@ const useStore = create(
 
       deleteBundle: async (bundleId) => {
         try {
-          const response = await axios.post(`[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/admin_bundles.php`, {
+          const response = await axios.post(`[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/admin_bundles.php`, {
             action: 'delete',
             id: bundleId
           });
@@ -107,7 +108,7 @@ const useStore = create(
 
       updateProduct: async (productData) => {
         try {
-          const response = await axios.put('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/admin_products.php', productData);
+          const response = await axios.put('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/admin_products.php', productData);
           if (response.data.status === 'success') {
             return { success: true, message: response.data.message };
           }
@@ -149,7 +150,7 @@ placeOrder: async (orderDetails) => {
   const finalTotal = subtotal - discountAmount;
 
   try {
-    const response = await axios.post('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/place_order.php', {
+    const response = await axios.post('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/place_order.php', {
       ...orderDetails,
       user_id: currentUser.id,
       total_price: finalTotal.toFixed(2), 
@@ -186,7 +187,7 @@ placeOrder: async (orderDetails) => {
 
       fetchAllOrdersFromDB: async () => {
         try {
-          const response = await axios.get('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/get_all_orders.php');
+          const response = await axios.get('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/get_all_orders.php');
           set({ orders: Array.isArray(response.data) ? response.data : [] });
         } catch (error) {
           console.error("Fetch All Orders Error:", error);
@@ -197,7 +198,7 @@ placeOrder: async (orderDetails) => {
 // تأكد من وجود/تعديل هذه الدالة في الـ Store
 updateOrderStatus: async (orderId, newStatus) => {
   try {
-    const response = await axios.post('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/update_order_status.php', {
+    const response = await axios.post('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/update_order_status.php', {
       order_id: orderId,
       status: newStatus // هنا لما نبعت 'delivered' هيروح للمبيعات
     });
@@ -217,7 +218,7 @@ updateOrderStatus: async (orderId, newStatus) => {
       deleteOrder: async (orderId) => {
         try {
           const orderToReturn = get().orders.find(o => o.id === orderId);
-          const response = await axios.post('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/delete_order.php', {
+          const response = await axios.post('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/delete_order.php', {
             order_id: orderId
           });
           if (response.data.status === 'success') {
@@ -242,7 +243,7 @@ updateOrderStatus: async (orderId, newStatus) => {
         try {
           const currentUser = get().user;
           if (!currentUser) return { success: false, message: "لم يتم العثور على مستخدم" };
-          const response = await axios.post('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/update_profile.php', {
+          const response = await axios.post('[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)/update_profile.php', {
             id: currentUser.id,
             ...updatedData 
           });
@@ -266,16 +267,18 @@ updateOrderStatus: async (orderId, newStatus) => {
       // --- جلب البيانات ---
       fetchProductsFromDB: async () => {
         try {
-          const response = await axios.get('[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/get_products.php');
+          // لاحظ استخدام https و get_products.php
+          const response = await axios.get(`${BASE_URL}/get_products.php`);
           set({ products: getProductsFromResponse(response.data) });
         } catch (error) {
+          console.error("Fetch Products Error:", error);
           set({ products: [] });
         }
       },
 
-      fetchUserOrdersFromDB: async (userId) => {
+     fetchUserOrdersFromDB: async (userId) => {
         try {
-          const response = await axios.get(`[http://electronic-api.atwebpages.com](http://electronic-api.atwebpages.com)/get_user_orders.php?user_id=${userId}`);
+          const response = await axios.get(`${BASE_URL}/get_user_orders.php?user_id=${userId}`);
           set({ orders: Array.isArray(response.data) ? response.data : [] });
         } catch (error) {
           console.error("Fetch User Orders Error:", error);
