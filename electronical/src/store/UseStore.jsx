@@ -1,8 +1,10 @@
 import { create } from 'zustand';
+import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios from 'axios';
 
-const BASE_URL = 'https://electronic-api.atwebpages.com';
+// تأكد من وجود const قبل الاسم ومكانها بره الـ create
+const BASE_URL = 'https://electronic-api.atwebpages.com'; 
 
 const normalizeArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -61,12 +63,11 @@ const useStore = create(
           return { success: false, message: "خطأ في الاتصال بالسيرفر" };
         }
       },
-
-      // --- وظائف الباندلز (Bundles) ---
-     fetchBundles: async () => {
+ // --- وظائف الباندلز (Bundles) ---
+      fetchBundles: async () => {
         try {
-          // استخدام HTTPS و BASE_URL
-          const response = await axios.get(`${BASE_URL}/get_bundles.php`); 
+          // استخدام HTTPS و BASE_URL الموحد
+          const response = await axios.get(`${BASE_URL}/admin_bundles.php`); 
           set({ bundles: Array.isArray(response.data) ? response.data : [] });
         } catch (error) {
           console.error("Fetch Bundles Error:", error);
@@ -266,10 +267,9 @@ updateOrderStatus: async (orderId, newStatus) => {
         localStorage.removeItem('shopify-storage');
       },
 
-      // --- جلب البيانات ---
-      fetchProductsFromDB: async () => {
+   fetchProductsFromDB: async () => {
         try {
-          // لاحظ استخدام https و get_products.php
+          // جلب المنتجات باستخدام المسار الموحد
           const response = await axios.get(`${BASE_URL}/get_products.php`);
           set({ products: getProductsFromResponse(response.data) });
         } catch (error) {
@@ -278,8 +278,11 @@ updateOrderStatus: async (orderId, newStatus) => {
         }
       },
 
-     fetchUserOrdersFromDB: async (userId) => {
+
+   // --- جلب طلبات المستخدم ---
+      fetchUserOrdersFromDB: async (userId) => {
         try {
+          // جلب الطلبات مع تمرير الـ userId
           const response = await axios.get(`${BASE_URL}/get_user_orders.php?user_id=${userId}`);
           set({ orders: Array.isArray(response.data) ? response.data : [] });
         } catch (error) {
