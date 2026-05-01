@@ -1,10 +1,9 @@
 import { create } from 'zustand';
-import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios from 'axios';
 
-// تأكد من وجود const قبل الاسم ومكانها بره الـ create
-const BASE_URL = '[https://electronic-api.atwebpages.com](https://electronic-api.atwebpages.com)';
+// 1. تأكد أن هذا السطر خارج دالة الـ create وفي بداية الملف
+const BASE_URL = 'https://electronic-api.atwebpages.com';
 
 const normalizeArray = (value) => (Array.isArray(value) ? value : []);
 
